@@ -1,14 +1,37 @@
 import React from 'react';
 import cssmodules from 'react-css-modules';
 import styles from './mapcontainer.cssmodule.sass';
-import ReactMapboxGl, { Layer, Feature } from "react-mapbox-gl";
+import ReactMapboxGl, {
+  ScaleControl,
+  ZoomControl,
+  RotationControl,
+  Layer,
+  Feature
+} from "react-mapbox-gl";
+const { token } = require('../../sources/config.json');
+const route = require('../../sources/route.json');
+import { AllShapesPolygonCoords, AllShapesMultiPolygonCoords } from '../../sources/data';
+const mappedRoute = route.points.map((point: any) => [ point.lat, point.lng ]);
 
 class MapContainer extends React.Component {
 
   render() {
     const Map = ReactMapboxGl({
-      accessToken: "pk.eyJ1IjoieGluZ21lYW5zb2siLCJhIjoiY2o0bnQ4dmxvMWhhNjMzcGx5NGM0cncyZiJ9.5cy4rg9_GhW7UbCzXZWcLA"
+      accessToken: token
     });
+    const lineLayout = {
+      'line-cap': 'round',
+      'line-join': 'round'
+    };
+
+    const linePaint = {
+      'line-color': '#4790E5',
+      'line-width': 12
+    };
+    const multiPolygonPaint = {
+      'fill-color': '#3bb2d0',
+      'fill-opacity': .5
+    };
     return (
       <Map
         style="mapbox://styles/mapbox/streets-v9"
@@ -16,12 +39,30 @@ class MapContainer extends React.Component {
           height: "100vh",
           width: "100vw"
         }}>
-          <Layer
-            type="symbol"
-            id="marker"
-            layout={{ "icon-image": "marker-15" }}>
-            <Feature coordinates={[-0.481747846041145, 51.3233379650232]}/>
-          </Layer>
+        {/* Controls */}
+        <ZoomControl/>
+        <RotationControl
+          style={{ top: 80 }}
+        />
+
+        {/* Line example */}
+        <Layer
+          type="line"
+          layout={lineLayout}
+          paint={linePaint}
+        >
+          <Feature coordinates={mappedRoute}/>
+        </Layer>
+
+
+        {/* Multi Polygon example */}
+        <Layer
+          type="fill"
+          paint={multiPolygonPaint}
+        >
+          <Feature coordinates={AllShapesMultiPolygonCoords}/>
+        </Layer>
+
       </Map>
     );
   }
